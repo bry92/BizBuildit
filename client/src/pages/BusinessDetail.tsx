@@ -6,6 +6,7 @@ import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import { Palette, Globe, DollarSign, Megaphone, Loader2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import ExportButtons from "@/components/ExportButtons";
 
 interface BusinessDetailProps {
   params: {
@@ -104,8 +105,8 @@ export default function BusinessDetail({ params }: BusinessDetailProps) {
     <BizForgeDashboard>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-start justify-between">
-          <div>
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
               <Button
                 variant="ghost"
@@ -116,14 +117,22 @@ export default function BusinessDetail({ params }: BusinessDetailProps) {
                 <ArrowLeft className="w-4 h-4" />
               </Button>
             </div>
-            <h1 className="text-3xl font-bold">{business.name}</h1>
-            <p className="text-muted-foreground mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold truncate">{business.name}</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1 truncate">
               {business.serviceType} • {business.location}
             </p>
           </div>
-          <div className="px-3 py-1 bg-primary/20 text-primary text-sm font-medium rounded">
-            {business.status}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="px-3 py-1 bg-primary/20 text-primary text-xs sm:text-sm font-medium rounded">
+              {business.status}
+            </div>
           </div>
+        </div>
+
+        {/* Export Buttons */}
+        <div className="bg-card border border-border rounded-lg p-3 sm:p-4">
+          <p className="text-xs sm:text-sm font-medium text-foreground mb-3">Download Business Package</p>
+          <ExportButtons businessId={business.id} businessName={business.name} />
         </div>
 
         {/* Business Info Card */}

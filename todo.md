@@ -81,3 +81,11 @@
 - [x] Fix form inputs and spacing on mobile
 - [x] Optimize module pages for mobile viewing
 - [x] Test all pages on various screen sizes
+
+## Export Functionality (Phase 11)
+- [x] Create HTML export generator for complete business package
+- [x] Implement text report export for business reports
+- [x] Create CSV export for pricing and leads data
+- [x] Add download buttons to business detail page
+- [x] Test export files for proper formatting and content
+- [x] Write and pass vitest tests for export functions
