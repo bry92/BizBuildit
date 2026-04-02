@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
-import { Palette, Globe, DollarSign, Megaphone, Loader2, ArrowLeft, Image } from "lucide-react";
+import { Palette, Globe, DollarSign, Megaphone, Loader2, ArrowLeft, Image, FileText } from "lucide-react";
 import { toast } from "sonner";
 import ExportButtons from "@/components/ExportButtons";
 
@@ -166,7 +166,7 @@ export default function BusinessDetail({ params }: BusinessDetailProps) {
 
         {/* Generation Tabs */}
         <Tabs defaultValue="branding" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 bg-card border border-border">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-card border border-border">
             <TabsTrigger value="branding" className="flex items-center gap-2 text-xs sm:text-sm">
               <Palette className="w-4 h-4" />
               <span className="hidden sm:inline">Branding</span>
@@ -186,6 +186,10 @@ export default function BusinessDetail({ params }: BusinessDetailProps) {
             <TabsTrigger value="logo" className="flex items-center gap-2 text-xs sm:text-sm">
               <Image className="w-4 h-4" />
               <span className="hidden sm:inline">Logo</span>
+            </TabsTrigger>
+            <TabsTrigger value="plan" className="flex items-center gap-2 text-xs sm:text-sm">
+              <FileText className="w-4 h-4" />
+              <span className="hidden sm:inline">Plan</span>
             </TabsTrigger>
           </TabsList>
 
@@ -497,7 +501,23 @@ export default function BusinessDetail({ params }: BusinessDetailProps) {
               </CardContent>
             </Card>
           </TabsContent>
-         </Tabs>
+
+          {/* Business Plan Tab */}
+          <TabsContent value="plan" className="space-y-4">
+            <Card className="bg-card border-border">
+              <CardContent className="py-8 text-center">
+                <FileText className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground mb-4">Generate comprehensive business plan and financial projections</p>
+                <Button
+                  onClick={() => navigate(`/business-plan?id=${businessId}`)}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  Go to Business Plan
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </BizForgeDashboard>
   );

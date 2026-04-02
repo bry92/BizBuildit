@@ -12,6 +12,9 @@ import WebsiteModule from "./pages/WebsiteModule";
 import PricingModule from "./pages/PricingModule";
 import LeadsModule from "./pages/LeadsModule";
 import LogoModule from "./pages/LogoModule";
+import BusinessPlanModule from "./pages/BusinessPlanModule";
+import MarketIntelligenceModule from "./pages/MarketIntelligenceModule";
+import DeploymentModule from "./pages/DeploymentModule";
 
 function Router() {
   return (
@@ -24,6 +27,9 @@ function Router() {
       <Route path={"/pricing"} component={PricingModule} />
       <Route path={"leads"} component={LeadsModule} />
       <Route path={"logo"} component={LogoModule} />
+      <Route path={"business-plan"} component={BusinessPlanModule} />
+      <Route path={"market-intelligence"} component={MarketIntelligenceModule} />
+      <Route path={"deployment"} component={DeploymentModule} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
