@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, businesses, InsertBusiness, brandingResults, InsertBrandingResult, websiteResults, InsertWebsiteResult, pricingResults, InsertPricingResult, leadResults, InsertLeadResult, showcaseBusinesses } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -87,6 +87,107 @@ export async function getUserByOpenId(openId: string) {
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
 
   return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createBusiness(userId: number, data: Omit<InsertBusiness, 'userId'>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(businesses).values({
+    ...data,
+    userId,
+  });
+  
+  return result;
+}
+
+export async function getUserBusinesses(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(businesses).where(eq(businesses.userId, userId));
+}
+
+export async function getBusinessById(businessId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(businesses).where(eq(businesses.id, businessId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateBusiness(businessId: number, data: Partial<InsertBusiness>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.update(businesses).set(data).where(eq(businesses.id, businessId));
+}
+
+export async function createBrandingResult(data: InsertBrandingResult) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.insert(brandingResults).values(data);
+}
+
+export async function getBrandingResult(businessId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(brandingResults).where(eq(brandingResults.businessId, businessId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createWebsiteResult(data: InsertWebsiteResult) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.insert(websiteResults).values(data);
+}
+
+export async function getWebsiteResult(businessId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(websiteResults).where(eq(websiteResults.businessId, businessId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createPricingResult(data: InsertPricingResult) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.insert(pricingResults).values(data);
+}
+
+export async function getPricingResult(businessId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(pricingResults).where(eq(pricingResults.businessId, businessId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createLeadResult(data: InsertLeadResult) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.insert(leadResults).values(data);
+}
+
+export async function getLeadResult(businessId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(leadResults).where(eq(leadResults.businessId, businessId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getShowcaseBusinesses(limit: number = 6) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return db.select().from(showcaseBusinesses).limit(limit);
 }
 
 // TODO: add feature queries here as your schema grows.
