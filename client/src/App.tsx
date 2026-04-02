@@ -11,6 +11,7 @@ import BrandingModule from "./pages/BrandingModule";
 import WebsiteModule from "./pages/WebsiteModule";
 import PricingModule from "./pages/PricingModule";
 import LeadsModule from "./pages/LeadsModule";
+import LogoModule from "./pages/LogoModule";
 
 function Router() {
   return (
@@ -21,7 +22,8 @@ function Router() {
       <Route path={"/branding"} component={BrandingModule} />
       <Route path={"/website"} component={WebsiteModule} />
       <Route path={"/pricing"} component={PricingModule} />
-      <Route path={"/leads"} component={LeadsModule} />
+      <Route path={"leads"} component={LeadsModule} />
+      <Route path={"logo"} component={LogoModule} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, businesses, InsertBusiness, brandingResults, InsertBrandingResult, websiteResults, InsertWebsiteResult, pricingResults, InsertPricingResult, leadResults, InsertLeadResult, showcaseBusinesses } from "../drizzle/schema";
+import { InsertUser, users, businesses, InsertBusiness, brandingResults, InsertBrandingResult, websiteResults, InsertWebsiteResult, pricingResults, InsertPricingResult, leadResults, InsertLeadResult, showcaseBusinesses, logoResults, InsertLogoResult, businessPlanResults, InsertBusinessPlanResult } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -188,6 +188,36 @@ export async function getShowcaseBusinesses(limit: number = 6) {
   if (!db) return [];
   
   return db.select().from(showcaseBusinesses).limit(limit);
+}
+
+export async function createLogoResult(data: InsertLogoResult) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.insert(logoResults).values(data);
+}
+
+export async function getLogoResult(businessId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(logoResults).where(eq(logoResults.businessId, businessId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createBusinessPlanResult(data: InsertBusinessPlanResult) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  return db.insert(businessPlanResults).values(data);
+}
+
+export async function getBusinessPlanResult(businessId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(businessPlanResults).where(eq(businessPlanResults.businessId, businessId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
 }
 
 // TODO: add feature queries here as your schema grows.

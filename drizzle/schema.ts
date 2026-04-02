@@ -139,3 +139,50 @@ export const showcaseBusinesses = mysqlTable("showcaseBusinesses", {
 
 export type ShowcaseBusiness = typeof showcaseBusinesses.$inferSelect;
 export type InsertShowcaseBusiness = typeof showcaseBusinesses.$inferInsert;
+
+/**
+ * Logo and visual asset generation results
+ * Stores generated logo images and social media assets
+ */
+export const logoResults = mysqlTable("logoResults", {
+  id: int("id").autoincrement().primaryKey(),
+  businessId: int("businessId").notNull(),
+  logoImageUrl: text("logoImageUrl"), // CDN URL to generated logo
+  logoPrompt: text("logoPrompt"), // Original prompt used for generation
+  facebookBannerUrl: text("facebookBannerUrl"),
+  instagramBannerUrl: text("instagramBannerUrl"),
+  linkedinBannerUrl: text("linkedinBannerUrl"),
+  businessCardUrl: text("businessCardUrl"),
+  faviconUrl: text("faviconUrl"),
+  appIconUrl: text("appIconUrl"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type LogoResult = typeof logoResults.$inferSelect;
+export type InsertLogoResult = typeof logoResults.$inferInsert;
+
+/**
+ * Business plan and financial model results
+ * Stores generated business plans, financial projections, and analysis
+ */
+export const businessPlanResults = mysqlTable("businessPlanResults", {
+  id: int("id").autoincrement().primaryKey(),
+  businessId: int("businessId").notNull(),
+  executiveSummary: text("executiveSummary"),
+  companyDescription: text("companyDescription"),
+  marketAnalysis: text("marketAnalysis"),
+  organizationStructure: text("organizationStructure"),
+  marketingStrategy: text("marketingStrategy"),
+  operationalPlan: text("operationalPlan"),
+  financialProjections: json("financialProjections"), // { year1, year2, year3: { revenue, expenses, profit } }
+  cashFlowAnalysis: json("cashFlowAnalysis"), // { monthly: [{ month, inflow, outflow, balance }] }
+  breakEvenAnalysis: json("breakEvenAnalysis"), // { breakEvenPoint, monthsToBreakEven }
+  fundingRequirements: text("fundingRequirements"),
+  riskAnalysis: text("riskAnalysis"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BusinessPlanResult = typeof businessPlanResults.$inferSelect;
+export type InsertBusinessPlanResult = typeof businessPlanResults.$inferInsert;

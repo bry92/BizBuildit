@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
-import { Palette, Globe, DollarSign, Megaphone, Loader2, ArrowLeft } from "lucide-react";
+import { Palette, Globe, DollarSign, Megaphone, Loader2, ArrowLeft, Image } from "lucide-react";
 import { toast } from "sonner";
 import ExportButtons from "@/components/ExportButtons";
 
@@ -166,22 +166,26 @@ export default function BusinessDetail({ params }: BusinessDetailProps) {
 
         {/* Generation Tabs */}
         <Tabs defaultValue="branding" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-card border border-border">
-            <TabsTrigger value="branding" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 bg-card border border-border">
+            <TabsTrigger value="branding" className="flex items-center gap-2 text-xs sm:text-sm">
               <Palette className="w-4 h-4" />
               <span className="hidden sm:inline">Branding</span>
             </TabsTrigger>
-            <TabsTrigger value="website" className="flex items-center gap-2">
+            <TabsTrigger value="website" className="flex items-center gap-2 text-xs sm:text-sm">
               <Globe className="w-4 h-4" />
               <span className="hidden sm:inline">Website</span>
             </TabsTrigger>
-            <TabsTrigger value="pricing" className="flex items-center gap-2">
+            <TabsTrigger value="pricing" className="flex items-center gap-2 text-xs sm:text-sm">
               <DollarSign className="w-4 h-4" />
               <span className="hidden sm:inline">Pricing</span>
             </TabsTrigger>
-            <TabsTrigger value="leads" className="flex items-center gap-2">
+            <TabsTrigger value="leads" className="flex items-center gap-2 text-xs sm:text-sm">
               <Megaphone className="w-4 h-4" />
               <span className="hidden sm:inline">Leads</span>
+            </TabsTrigger>
+            <TabsTrigger value="logo" className="flex items-center gap-2 text-xs sm:text-sm">
+              <Image className="w-4 h-4" />
+              <span className="hidden sm:inline">Logo</span>
             </TabsTrigger>
           </TabsList>
 
@@ -477,7 +481,23 @@ export default function BusinessDetail({ params }: BusinessDetailProps) {
               </Card>
             )}
           </TabsContent>
-        </Tabs>
+
+          {/* Logo Tab */}
+          <TabsContent value="logo" className="space-y-4">
+            <Card className="bg-card border-border">
+              <CardContent className="py-8 text-center">
+                <Image className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+                <p className="text-muted-foreground mb-4">Generate professional logos and visual assets</p>
+                <Button
+                  onClick={() => navigate(`/logo?id=${businessId}`)}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  Go to Logo Generator
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+         </Tabs>
       </div>
     </BizForgeDashboard>
   );
