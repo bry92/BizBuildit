@@ -133,14 +133,14 @@ export default function CreateBusiness() {
 
   return (
     <BizForgeDashboard>
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto px-0">
         {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex items-center justify-between mb-4 gap-1 sm:gap-2">
             {steps.map((s, index) => (
               <div key={index} className="flex items-center flex-1">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-colors ${
+                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm transition-colors ${
                     index + 1 < step
                       ? "bg-primary text-primary-foreground"
                       : index + 1 === step
@@ -156,7 +156,7 @@ export default function CreateBusiness() {
                 </div>
                 {index < steps.length - 1 && (
                   <div
-                    className={`flex-1 h-1 mx-2 transition-colors ${
+                    className={`flex-1 h-1 mx-1 sm:mx-2 transition-colors ${
                       index + 1 < step ? "bg-primary" : "bg-muted"
                     }`}
                   />
@@ -164,18 +164,18 @@ export default function CreateBusiness() {
               </div>
             ))}
           </div>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-xs sm:text-sm text-muted-foreground">
             Step {step} of {steps.length}
           </div>
         </div>
 
         {/* Form Card */}
-        <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle>{steps[step - 1].title}</CardTitle>
-            <CardDescription>{steps[step - 1].description}</CardDescription>
+        <Card className="bg-card border-border rounded-lg sm:rounded-lg">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">{steps[step - 1].title}</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">{steps[step - 1].description}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6">
             {/* Step 1: Business Name */}
             {step === 1 && (
               <div className="space-y-2">
@@ -271,41 +271,46 @@ export default function CreateBusiness() {
             )}
 
             {/* Navigation Buttons */}
-            <div className="flex gap-4 pt-6">
+            <div className="flex gap-2 sm:gap-4 pt-4 sm:pt-6">
               {step > 1 && (
                 <Button
                   variant="outline"
                   onClick={handleBack}
-                  className="flex-1"
+                  className="flex-1 text-xs sm:text-sm"
                   disabled={createMutation.isPending}
                 >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back
+                  <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Back</span>
                 </Button>
               )}
               {step < steps.length && (
                 <Button
                   onClick={handleNext}
-                  className="flex-1 bg-primary hover:bg-primary/90"
+                  className="flex-1 bg-primary hover:bg-primary/90 text-xs sm:text-sm"
                   disabled={createMutation.isPending}
                 >
-                  Next
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  <span className="hidden sm:inline">Next</span>
+                  <span className="sm:hidden">Next</span>
+                  <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" />
                 </Button>
               )}
               {step === steps.length && (
                 <Button
                   onClick={handleSubmit}
-                  className="flex-1 bg-primary hover:bg-primary/90"
+                  className="flex-1 bg-primary hover:bg-primary/90 text-xs sm:text-sm"
                   disabled={createMutation.isPending}
                 >
                   {createMutation.isPending ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground mr-2" />
-                      Creating...
+                      <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-primary-foreground mr-1 sm:mr-2" />
+                      <span className="hidden sm:inline">Creating...</span>
+                      <span className="sm:hidden">Creating</span>
                     </>
                   ) : (
-                    "Create Business"
+                    <>
+                      <span className="hidden sm:inline">Create Business</span>
+                      <span className="sm:hidden">Create</span>
+                    </>
                   )}
                 </Button>
               )}
@@ -315,12 +320,12 @@ export default function CreateBusiness() {
 
         {/* Summary */}
         {step === steps.length && (
-          <Card className="bg-card border-border mt-6">
-            <CardHeader>
-              <CardTitle className="text-base">Review Your Information</CardTitle>
+          <Card className="bg-card border-border mt-4 sm:mt-6">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">Review Your Information</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid grid-cols-2 gap-4">
+            <CardContent className="space-y-3 p-4 sm:p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <p className="text-xs text-muted-foreground">Business Name</p>
                   <p className="font-medium">{formData.name}</p>

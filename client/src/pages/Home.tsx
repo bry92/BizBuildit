@@ -45,9 +45,9 @@ export default function Home() {
     <BizForgeDashboard>
       <div className="space-y-8">
         {/* Welcome Section */}
-        <div className="bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg p-8 border border-primary/30">
-          <h2 className="text-3xl font-bold mb-2">Welcome to BizForge AI</h2>
-          <p className="text-muted-foreground mb-6">
+        <div className="bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg p-4 sm:p-6 md:p-8 border border-primary/30">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-2">Welcome to BizForge AI</h2>
+          <p className="text-sm sm:text-base text-muted-foreground mb-6">
             Build a complete business concept in minutes with AI-powered tools for branding, websites, pricing, and marketing.
           </p>
           <Button
@@ -61,15 +61,15 @@ export default function Home() {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
           <Card className="bg-card border-border">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                 Businesses Created
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{businesses?.length || 0}</div>
+              <div className="text-xl sm:text-2xl font-bold">{businesses?.length || 0}</div>
             </CardContent>
           </Card>
           <Card className="bg-card border-border">
@@ -112,8 +112,8 @@ export default function Home() {
 
         {/* Features Grid */}
         <div>
-          <h3 className="text-xl font-bold mb-4">Available Tools</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <h3 className="text-lg sm:text-xl font-bold mb-4">Available Tools</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {features.map((feature) => {
               const Icon = feature.icon;
               return (
@@ -138,7 +138,7 @@ export default function Home() {
         {/* Recent Businesses */}
         {businesses && businesses.length > 0 && (
           <div>
-            <h3 className="text-xl font-bold mb-4">Your Recent Businesses</h3>
+            <h3 className="text-lg sm:text-xl font-bold mb-4">Your Recent Businesses</h3>
             <div className="space-y-3">
               {businesses.slice(0, 5).map((business) => (
                 <Card
@@ -147,14 +147,14 @@ export default function Home() {
                   onClick={() => navigate(`/business/${business.id}`)}
                 >
                   <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-base">{business.name}</CardTitle>
-                        <CardDescription>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <CardTitle className="text-sm sm:text-base truncate">{business.name}</CardTitle>
+                        <CardDescription className="text-xs sm:text-sm truncate">
                           {business.serviceType} • {business.location}
                         </CardDescription>
                       </div>
-                      <div className="px-2 py-1 bg-primary/20 text-primary text-xs font-medium rounded">
+                      <div className="px-2 py-1 bg-primary/20 text-primary text-xs font-medium rounded flex-shrink-0">
                         {business.status}
                       </div>
                     </div>
