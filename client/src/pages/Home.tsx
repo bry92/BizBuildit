@@ -1,4 +1,4 @@
-import BizForgeDashboard from "@/components/BizForgeDashboard";
+import BizBuildItDashboard from "@/components/BizForgeDashboard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
@@ -42,11 +42,11 @@ export default function Home() {
   ];
 
   return (
-    <BizForgeDashboard>
+    <BizBuildItDashboard>
       <div className="space-y-8">
         {/* Welcome Section */}
         <div className="bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg p-4 sm:p-6 md:p-8 border border-primary/30">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-2">Welcome to BizForge AI</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-2">Welcome to BizBuildIt</h2>
           <p className="text-sm sm:text-base text-muted-foreground mb-6">
             Build a complete business concept in minutes with AI-powered tools for branding, websites, pricing, and marketing.
           </p>
@@ -185,6 +185,6 @@ export default function Home() {
           </Card>
         )}
       </div>
-    </BizForgeDashboard>
+    </BizBuildItDashboard>
   );
 }

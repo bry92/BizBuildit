@@ -1,4 +1,4 @@
-import BizForgeDashboard from "@/components/BizForgeDashboard";
+import BizBuildItDashboard from "@/components/BizForgeDashboard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -76,20 +76,20 @@ export default function BusinessDetail({ params }: BusinessDetailProps) {
 
   if (businessLoading) {
     return (
-      <BizForgeDashboard>
+      <BizBuildItDashboard>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
             <p className="text-muted-foreground">Loading business details...</p>
           </div>
         </div>
-      </BizForgeDashboard>
+      </BizBuildItDashboard>
     );
   }
 
   if (!business) {
     return (
-      <BizForgeDashboard>
+      <BizBuildItDashboard>
         <div className="text-center py-12">
           <p className="text-muted-foreground mb-4">Business not found</p>
           <Button onClick={() => navigate("/")} variant="outline">
@@ -97,12 +97,12 @@ export default function BusinessDetail({ params }: BusinessDetailProps) {
             Back to Dashboard
           </Button>
         </div>
-      </BizForgeDashboard>
+      </BizBuildItDashboard>
     );
   }
 
   return (
-    <BizForgeDashboard>
+    <BizBuildItDashboard>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
@@ -519,6 +519,6 @@ export default function BusinessDetail({ params }: BusinessDetailProps) {
           </TabsContent>
         </Tabs>
       </div>
-    </BizForgeDashboard>
+    </BizBuildItDashboard>
   );
 }

@@ -16,11 +16,11 @@ import {
   Settings,
 } from "lucide-react";
 
-interface BizForgeDashboardProps {
+interface BizBuildItDashboardProps {
   children: React.ReactNode;
 }
 
-export default function BizForgeDashboard({ children }: BizForgeDashboardProps) {
+export default function BizBuildItDashboard({ children }: BizBuildItDashboardProps) {
   const { user, logout, isAuthenticated, loading } = useAuth();
   const [location, navigate] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -40,9 +40,9 @@ export default function BizForgeDashboard({ children }: BizForgeDashboardProps) 
     return (
       <div className="flex items-center justify-center min-h-screen bg-background px-4">
         <div className="text-center">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-4 text-foreground">BizForge AI</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-4 text-foreground">BizBuildIt</h1>
           <p className="text-muted-foreground mb-8 text-sm sm:text-base">
-            Build a business in minutes, scale forever.
+            Build a complete business concept with AI in minutes.
           </p>
           <a href={getLoginUrl()}>
             <Button size="lg" className="bg-primary hover:bg-primary/90">
@@ -105,8 +105,7 @@ export default function BizForgeDashboard({ children }: BizForgeDashboardProps) 
             <Zap className="w-5 h-5 text-primary-foreground" />
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-sm text-foreground">BizForge</span>
-            <span className="text-xs text-muted-foreground">AI</span>
+            <span className="font-bold text-sm text-foreground">BizBuildIt</span>
           </div>
         </div>
         <button
@@ -138,8 +137,7 @@ export default function BizForgeDashboard({ children }: BizForgeDashboardProps) 
               <Zap className="w-5 h-5 text-primary-foreground" />
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-sm text-foreground">BizForge</span>
-              <span className="text-xs text-muted-foreground">AI</span>
+              <span className="font-bold text-sm text-foreground">BizBuildIt</span>
             </div>
           </div>
         </div>
@@ -197,7 +195,7 @@ export default function BizForgeDashboard({ children }: BizForgeDashboardProps) 
           <div className="min-w-0 flex-1">
             <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">
               {navigationItems.find((item) => item.path === location)?.label ||
-                "BizForge AI"}
+                "BizBuildIt"}
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground">
               Build your business concept with AI

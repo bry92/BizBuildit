@@ -1,4 +1,4 @@
-import BizForgeDashboard from "@/components/BizForgeDashboard";
+import BizBuildItDashboard from "@/components/BizForgeDashboard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -34,7 +34,7 @@ export default function LeadsModule() {
 
   if (!selectedBusiness) {
     return (
-      <BizForgeDashboard>
+      <BizBuildItDashboard>
         <div className="text-center py-12">
           <p className="text-muted-foreground mb-4">No business selected</p>
           <Button onClick={() => navigate("/")} variant="outline">
@@ -42,12 +42,12 @@ export default function LeadsModule() {
             Back to Dashboard
           </Button>
         </div>
-      </BizForgeDashboard>
+      </BizBuildItDashboard>
     );
   }
 
   return (
-    <BizForgeDashboard>
+    <BizBuildItDashboard>
       <div className="space-y-6">
         {/* Header */}
         <div>
@@ -253,6 +253,6 @@ export default function LeadsModule() {
           </Card>
         )}
       </div>
-    </BizForgeDashboard>
+    </BizBuildItDashboard>
   );
 }

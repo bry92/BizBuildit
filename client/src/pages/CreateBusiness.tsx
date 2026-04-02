@@ -1,4 +1,4 @@
-import BizForgeDashboard from "@/components/BizForgeDashboard";
+import BizBuildItDashboard from "@/components/BizForgeDashboard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -132,7 +132,7 @@ export default function CreateBusiness() {
   ];
 
   return (
-    <BizForgeDashboard>
+    <BizBuildItDashboard>
       <div className="max-w-2xl mx-auto px-0">
         {/* Progress Bar */}
         <div className="mb-6 sm:mb-8">
@@ -355,6 +355,6 @@ export default function CreateBusiness() {
           </Card>
         )}
       </div>
-    </BizForgeDashboard>
+    </BizBuildItDashboard>
   );
 }
