@@ -150,3 +150,10 @@
 - [x] Update Branding Engine example output
 - [x] Update code comments and references
 - [x] Refresh interface and test all pages
+
+
+## Feature Enhancements
+- [ ] Add custom service type input when "Other" is selected in form
+- [ ] Finalize custom service type input when Other is selected
+- [ ] Add custom notification system to website
+- [ ] Export repository to GitHub

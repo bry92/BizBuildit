@@ -9,9 +9,11 @@ import { useLocation } from "wouter";
 import { Loader2, ArrowLeft, Save, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useNotifications } from "@/components/NotificationCenter";
 
 export default function BrandingModule() {
   const [, navigate] = useLocation();
+  const { addNotification } = useNotifications();
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState({
     businessName: "",
@@ -29,16 +31,31 @@ export default function BrandingModule() {
 
   const generateMutation = trpc.business.generateBranding.useMutation({
     onSuccess: () => {
-      toast.success("Branding generated successfully!");
+      addNotification({
+        type: "success",
+        title: "Branding Generated!",
+        message: "Your brand identity has been created. Review and customize as needed.",
+        duration: 4000,
+      });
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to generate branding");
+      addNotification({
+        type: "error",
+        title: "Generation Failed",
+        message: error.message || "Failed to generate branding",
+        duration: 5000,
+      });
     },
   });
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success("Copied to clipboard!");
+    addNotification({
+      type: "success",
+      title: "Copied!",
+      message: "Text copied to clipboard.",
+      duration: 2000,
+    });
   };
 
   if (!selectedBusiness) {

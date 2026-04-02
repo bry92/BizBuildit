@@ -16,6 +16,7 @@ import { useLocation } from "wouter";
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { toast } from "sonner";
+import { useNotifications } from "@/components/NotificationCenter";
 
 const SERVICE_TYPES = [
   "Pressure Washing",
@@ -43,10 +44,12 @@ const SERVICE_TYPES = [
 
 export default function CreateBusiness() {
   const [, navigate] = useLocation();
+  const { addNotification } = useNotifications();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     name: "",
     serviceType: "",
+    customServiceType: "",
     targetMarket: "",
     location: "",
     businessGoals: "",
@@ -54,11 +57,21 @@ export default function CreateBusiness() {
 
   const createMutation = trpc.business.create.useMutation({
     onSuccess: () => {
-      toast.success("Business created successfully!");
+      addNotification({
+        type: "success",
+        title: "Business Created!",
+        message: "Your business concept has been created successfully. Start generating content now.",
+        duration: 4000,
+      });
       navigate("/");
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to create business");
+      addNotification({
+        type: "error",
+        title: "Creation Failed",
+        message: error.message || "Failed to create business. Please try again.",
+        duration: 5000,
+      });
     },
   });
 
@@ -82,6 +95,10 @@ export default function CreateBusiness() {
       toast.error("Please select a service type");
       return;
     }
+    if (step === 2 && formData.serviceType === "Other" && !formData.customServiceType.trim()) {
+      toast.error("Please describe your service");
+      return;
+    }
     if (step === 3 && !formData.location.trim()) {
       toast.error("Please enter a location");
       return;
@@ -98,10 +115,14 @@ export default function CreateBusiness() {
       toast.error("Please fill in all required fields");
       return;
     }
+    if (formData.serviceType === "Other" && !formData.customServiceType.trim()) {
+      toast.error("Please describe your service");
+      return;
+    }
 
     createMutation.mutate({
       name: formData.name,
-      serviceType: formData.serviceType,
+      serviceType: formData.serviceType === "Other" ? formData.customServiceType : formData.serviceType,
       targetMarket: formData.targetMarket,
       location: formData.location,
       businessGoals: formData.businessGoals,
@@ -196,23 +217,42 @@ export default function CreateBusiness() {
 
             {/* Step 2: Service Type */}
             {step === 2 && (
-              <div className="space-y-2">
-                <Label htmlFor="serviceType">Service Type *</Label>
-                <Select value={formData.serviceType} onValueChange={handleSelectChange}>
-                  <SelectTrigger className="bg-input border-border">
-                    <SelectValue placeholder="Select a service type" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card border-border">
-                    {SERVICE_TYPES.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">
-                  Choose the primary service your business offers
-                </p>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="serviceType">Service Type *</Label>
+                  <Select value={formData.serviceType} onValueChange={handleSelectChange}>
+                    <SelectTrigger className="bg-input border-border">
+                      <SelectValue placeholder="Select a service type" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card border-border">
+                      {SERVICE_TYPES.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Choose the primary service your business offers
+                  </p>
+                </div>
+
+                {formData.serviceType === "Other" && (
+                  <div className="space-y-2 pt-2 border-t border-border">
+                    <Label htmlFor="customServiceType">What service do you provide? *</Label>
+                    <Input
+                      id="customServiceType"
+                      name="customServiceType"
+                      placeholder="e.g., Pet Grooming, Event Planning, etc."
+                      value={formData.customServiceType}
+                      onChange={handleInputChange}
+                      className="bg-input border-border"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Describe your unique service offering
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
