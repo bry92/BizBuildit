@@ -109,14 +109,14 @@ describe("Export Functions", () => {
 
     const csv = generateBusinessCSV(pkg);
 
-    expect(csv).toContain("Business Information");
+    expect(csv).toContain('"Business Information"');
     expect(csv).toContain("Crystal Clean Pressure Washing");
     expect(csv).toContain("Pressure Washing");
     expect(csv).toContain("Las Vegas, NV");
     expect(csv).toContain("Pricing Strategy");
     expect(csv).toContain("Basic");
     expect(csv).toContain("$150");
-    expect(csv).toContain("Lead Generation Templates");
+    expect(csv).toContain('"Lead Generation Templates"');
   });
 
   it("should generate valid text report", () => {
@@ -172,6 +172,30 @@ describe("Export Functions", () => {
 
     const csv = generateBusinessCSV(pkg);
 
-    expect(csv).toContain('Quote ""test"" with special chars');
+    expect(csv).toContain('"Quote ""test"" with special chars"');
+  });
+
+  it("should neutralize CSV formula injection payloads", () => {
+    const pkg = {
+      business: {
+        ...mockBusiness,
+        name: "=HYPERLINK(\"http://evil.test\")",
+      },
+      branding: mockBranding,
+      website: mockWebsite,
+      pricing: {
+        ...mockPricing,
+        recommendedTiers: [
+          { name: "@Calc", price: 1, description: "+SUM(A1:A2)" },
+        ],
+      },
+      leads: mockLeads,
+    };
+
+    const csv = generateBusinessCSV(pkg);
+
+    expect(csv).toContain(`"'=HYPERLINK(""http://evil.test"")"`);
+    expect(csv).toContain(`"'@Calc"`);
+    expect(csv).toContain(`"'+SUM(A1:A2)"`);
   });
 });
