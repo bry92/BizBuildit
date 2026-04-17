@@ -1,16 +1,18 @@
-export type AgentStepResult = {
-  action: string;
-  detail: string;
-  completed?: boolean;
-};
+import {
+  BrainActionType,
+  BrainDecision,
+  BrainInput,
+  generateNextActions,
+} from "./aiDecisionEngine";
 
-export type AgentExecutionContext = {
-  userId: number;
-  businessId: number;
-  cycleCount: number;
+export type AgentMemoryEntry = {
+  timestamp: string;
+  action: BrainActionType;
+  reason: string;
+  result: string;
+  metricsBefore: BrainInput["metrics"];
+  metricsAfter: BrainInput["metrics"];
 };
-
-export type AgentExecutor = (ctx: AgentExecutionContext) => Promise<AgentStepResult>;
 
 export type AgentState = {
   userId: number;
@@ -23,6 +25,9 @@ export type AgentState = {
   cycleCount: number;
   currentAction: string | null;
   lastError: string | null;
+  recentActions: string[];
+  lastDecision: BrainDecision | null;
+  memory: AgentMemoryEntry[];
   logs: Array<{
     at: string;
     level: "info" | "error";
@@ -30,7 +35,18 @@ export type AgentState = {
   }>;
 };
 
+export type AgentLoopDeps = {
+  sense: (ctx: { userId: number; businessId: number; state: AgentState }) => Promise<BrainInput>;
+  executeAction: (ctx: {
+    userId: number;
+    businessId: number;
+    action: BrainDecision["actions"][number];
+    state: AgentState;
+  }) => Promise<{ summary: string }>;
+};
+
 const MAX_LOGS = 100;
+const MAX_MEMORY = 200;
 
 function keyFor(userId: number, businessId: number): string {
   return `${userId}:${businessId}`;
@@ -51,29 +67,73 @@ export class AIBusinessAgentManager {
     }
   }
 
-  private async runCycle(state: AgentState, execute: AgentExecutor): Promise<void> {
+  private pushMemory(state: AgentState, entry: AgentMemoryEntry) {
+    state.memory.push(entry);
+    if (state.memory.length > MAX_MEMORY) {
+      state.memory.splice(0, state.memory.length - MAX_MEMORY);
+    }
+    state.recentActions = state.memory.slice(-5).map((item) => item.action);
+  }
+
+  private async tick(state: AgentState, deps: AgentLoopDeps): Promise<void> {
     if (!state.running || state.currentAction) {
       return;
     }
 
-    state.currentAction = "evaluating";
+    state.currentAction = "sense";
     state.lastRunAt = nowIso();
 
     try {
-      const result = await execute({
+      const before = await deps.sense({
         userId: state.userId,
         businessId: state.businessId,
-        cycleCount: state.cycleCount,
+        state,
       });
-      state.cycleCount += 1;
-      state.currentAction = result.action;
-      state.nextRunAt = new Date(Date.now() + state.intervalSeconds * 1000).toISOString();
-      state.lastError = null;
+
+      state.currentAction = "decide";
+      const decision = await generateNextActions({
+        ...before,
+        recentActions: state.recentActions,
+        memory: state.memory,
+      });
+      state.lastDecision = decision;
       this.pushLog(
         state,
         "info",
-        `${result.action}: ${result.detail}${result.completed ? " (completed)" : ""}`
+        `Decision priority=${decision.priority} actions=${decision.actions
+          .map((action) => action.type)
+          .join(",")}`
       );
+
+      for (const action of decision.actions) {
+        state.currentAction = `act:${action.type}`;
+        const result = await deps.executeAction({
+          userId: state.userId,
+          businessId: state.businessId,
+          action,
+          state,
+        });
+
+        state.currentAction = "learn";
+        const after = await deps.sense({
+          userId: state.userId,
+          businessId: state.businessId,
+          state,
+        });
+        this.pushMemory(state, {
+          timestamp: nowIso(),
+          action: action.type,
+          reason: action.reason,
+          result: result.summary,
+          metricsBefore: before.metrics,
+          metricsAfter: after.metrics,
+        });
+        this.pushLog(state, "info", `${action.type}: ${result.summary}`);
+      }
+
+      state.cycleCount += 1;
+      state.nextRunAt = new Date(Date.now() + state.intervalSeconds * 1000).toISOString();
+      state.lastError = null;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       state.lastError = message;
@@ -84,7 +144,7 @@ export class AIBusinessAgentManager {
     }
   }
 
-  start(userId: number, businessId: number, intervalSeconds: number, execute: AgentExecutor): AgentState {
+  start(userId: number, businessId: number, intervalSeconds: number, deps: AgentLoopDeps): AgentState {
     const key = keyFor(userId, businessId);
     const existingTimer = this.timers.get(key);
     if (existingTimer) {
@@ -102,14 +162,17 @@ export class AIBusinessAgentManager {
       cycleCount: 0,
       currentAction: null,
       lastError: null,
+      recentActions: [],
+      lastDecision: null,
+      memory: [],
       logs: [],
     };
     this.pushLog(state, "info", `Agent started with ${intervalSeconds}s cadence`);
     this.states.set(key, state);
 
-    void this.runCycle(state, execute);
+    void this.tick(state, deps);
     const timer = setInterval(() => {
-      void this.runCycle(state, execute);
+      void this.tick(state, deps);
     }, intervalSeconds * 1000);
 
     this.timers.set(key, timer);
@@ -140,13 +203,13 @@ export class AIBusinessAgentManager {
     return this.states.get(keyFor(userId, businessId)) ?? null;
   }
 
-  async runNow(userId: number, businessId: number, execute: AgentExecutor): Promise<AgentState | null> {
+  async runNow(userId: number, businessId: number, deps: AgentLoopDeps): Promise<AgentState | null> {
     const state = this.get(userId, businessId);
     if (!state || !state.running) {
       return null;
     }
 
-    await this.runCycle(state, execute);
+    await this.tick(state, deps);
     return state;
   }
 }

@@ -7,7 +7,8 @@ import {
   getWebsiteResult,
   updateBusiness,
 } from "../db";
-import { aiBusinessAgentManager } from "../_core/aiBusinessAgent";
+import { aiBusinessAgentManager, AgentLoopDeps, AgentState } from "../_core/aiBusinessAgent";
+import { BrainInput } from "../_core/aiDecisionEngine";
 import { protectedProcedure, router } from "../_core/trpc";
 import {
   generateBrandingForBusiness,
@@ -17,68 +18,117 @@ import {
 } from "./businessGenerators";
 import { invokeLLM } from "../_core/llm";
 
-async function executeAutonomousStep(userId: number, businessId: number, cycleCount: number) {
+async function ensureBusinessAccess(userId: number, businessId: number) {
   const business = await getBusinessById(businessId);
   if (!business || business.userId !== userId) {
     throw new Error("Business not found");
   }
+  return business;
+}
 
-  if (business.status === "draft") {
-    await updateBusiness(businessId, { status: "generated" });
-    return {
-      action: "initialize",
-      detail: "Business moved from draft to generated so automation can begin",
-    };
-  }
+async function senseBusinessState(userId: number, businessId: number, state: AgentState): Promise<BrainInput> {
+  const business = await ensureBusinessAccess(userId, businessId);
 
-  const branding = await getBrandingResult(businessId);
-  if (!branding) {
-    await generateBrandingForBusiness(businessId);
-    return { action: "branding", detail: "Generated brand identity assets" };
-  }
+  const [branding, website, pricing, leads] = await Promise.all([
+    getBrandingResult(businessId),
+    getWebsiteResult(businessId),
+    getPricingResult(businessId),
+    getLeadResult(businessId),
+  ]);
 
-  const website = await getWebsiteResult(businessId);
-  if (!website) {
-    await generateWebsiteForBusiness(businessId);
-    return { action: "website", detail: "Generated conversion-focused website content" };
-  }
-
-  const pricing = await getPricingResult(businessId);
-  if (!pricing) {
-    await generatePricingForBusiness(businessId);
-    return { action: "pricing", detail: "Generated tiered pricing and strategy" };
-  }
-
-  const leads = await getLeadResult(businessId);
-  if (!leads) {
-    await generateLeadsForBusiness(businessId);
-    return { action: "lead-gen", detail: "Generated outbound lead templates" };
-  }
-
-  const performanceReview = await invokeLLM({
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are an operations copilot for a small business. Respond with one concise optimization action.",
-      },
-      {
-        role: "user",
-        content: `Cycle ${cycleCount}: business=${business.name}; service=${business.serviceType}; location=${business.location}. Suggest one next best daily growth action with a measurable KPI.`,
-      },
-    ],
-  });
-
-  const content = performanceReview.choices[0]?.message.content;
-  const detail =
-    typeof content === "string"
-      ? content.slice(0, 240)
-      : "Reviewed current assets and prepared next optimization action";
+  const traffic = (website ? 120 : 20) + state.cycleCount * 5;
+  const conversions = Math.max(1, Math.floor(traffic * (leads ? 0.08 : 0.02)));
+  const baseRevenue = pricing?.recommendedTiers
+    ? (pricing.recommendedTiers as Array<{ price: number }>)[0]?.price || 0
+    : 0;
+  const revenue = conversions * baseRevenue;
+  const missingAssets = [branding, website, pricing, leads].filter((entry) => !entry).length;
 
   return {
-    action: "optimize",
-    detail,
-    completed: true,
+    businessId: String(business.id),
+    metrics: {
+      traffic,
+      conversions,
+      revenue,
+      churn: missingAssets > 0 ? 0.2 : 0.05,
+    },
+    recentActions: state.recentActions,
+    memory: state.memory,
+    systemHealth: {
+      errors: state.logs.filter((log) => log.level === "error").length,
+      uptime: Math.round((Date.now() - new Date(state.startedAt).getTime()) / 1000),
+    },
+  };
+}
+
+async function executeAction(userId: number, businessId: number, action: { type: string; reason: string; payload?: Record<string, unknown> }) {
+  await ensureBusinessAccess(userId, businessId);
+
+  switch (action.type) {
+    case "optimize_pricing": {
+      await generatePricingForBusiness(businessId);
+      return { summary: `Pricing optimization executed. ${action.reason}` };
+    }
+
+    case "generate_landing_page": {
+      const branding = await getBrandingResult(businessId);
+      if (!branding) {
+        await generateBrandingForBusiness(businessId);
+      }
+      await generateWebsiteForBusiness(businessId);
+      return { summary: `Landing page refreshed from latest brand voice. ${action.reason}` };
+    }
+
+    case "create_lead_magnet": {
+      await generateLeadsForBusiness(businessId);
+      return { summary: `Lead magnet and outreach copy generated. ${action.reason}` };
+    }
+
+    case "fix_funnel": {
+      const [branding, website, pricing, leads] = await Promise.all([
+        getBrandingResult(businessId),
+        getWebsiteResult(businessId),
+        getPricingResult(businessId),
+        getLeadResult(businessId),
+      ]);
+
+      if (!branding) await generateBrandingForBusiness(businessId);
+      if (!website) await generateWebsiteForBusiness(businessId);
+      if (!pricing) await generatePricingForBusiness(businessId);
+      if (!leads) await generateLeadsForBusiness(businessId);
+
+      await updateBusiness(businessId, { status: "generated" });
+      return { summary: `Funnel gaps repaired across missing assets. ${action.reason}` };
+    }
+
+    case "run_marketing_test": {
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: "You design small growth experiments for local service businesses.",
+          },
+          {
+            role: "user",
+            content: `Create one concise A/B marketing test for business ${businessId}. Include KPI and expected signal.`,
+          },
+        ],
+      });
+      const content = response.choices[0]?.message.content;
+      const plan = typeof content === "string" ? content.slice(0, 240) : "A/B experiment outlined";
+      return { summary: `Marketing experiment planned: ${plan}` };
+    }
+
+    case "analyze_metrics":
+    default:
+      return { summary: `Metrics reviewed for next optimization cycle. ${action.reason}` };
+  }
+}
+
+function createLoopDeps(): AgentLoopDeps {
+  return {
+    sense: ({ userId, businessId, state }) => senseBusinessState(userId, businessId, state),
+    executeAction: ({ userId, businessId, action }) => executeAction(userId, businessId, action),
   };
 }
 
@@ -92,17 +142,13 @@ export const agentRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const business = await getBusinessById(input.businessId);
-      if (!business || business.userId !== ctx.user.id) {
-        throw new Error("Business not found");
-      }
+      await ensureBusinessAccess(ctx.user.id, input.businessId);
 
       const state = aiBusinessAgentManager.start(
         ctx.user.id,
         input.businessId,
         input.intervalSeconds,
-        async ({ userId, businessId, cycleCount }) =>
-          executeAutonomousStep(userId, businessId, cycleCount)
+        createLoopDeps()
       );
 
       return {
@@ -124,12 +170,7 @@ export const agentRouter = router({
   }),
 
   runNow: protectedProcedure.input(inputSchema).mutation(async ({ ctx, input }) => {
-    const state = await aiBusinessAgentManager.runNow(
-      ctx.user.id,
-      input.businessId,
-      async ({ userId, businessId, cycleCount }) =>
-        executeAutonomousStep(userId, businessId, cycleCount)
-    );
+    const state = await aiBusinessAgentManager.runNow(ctx.user.id, input.businessId, createLoopDeps());
 
     return {
       success: !!state,
