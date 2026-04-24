@@ -451,38 +451,48 @@ export function generateBusinessHTML(pkg: BusinessPackage): string {
 export function generateBusinessCSV(pkg: BusinessPackage): string {
   const { business, pricing, leads } = pkg;
   const rows: string[] = [];
+  const escapeCsvCell = (value: unknown): string => {
+    const raw = value == null ? "" : String(value);
+    const safe =
+      /^[=+\-@\t\r]/.test(raw)
+        ? `'${raw}`
+        : raw;
+    return `"${safe.replace(/"/g, '""')}"`;
+  };
+  const makeCsvRow = (...cells: unknown[]): string =>
+    cells.map(escapeCsvCell).join(",");
 
   // Header
-  rows.push("Business Information");
-  rows.push(`Business Name,${business.name}`);
-  rows.push(`Service Type,${business.serviceType}`);
-  rows.push(`Location,${business.location}`);
-  rows.push(`Target Market,${business.targetMarket || "Not specified"}`);
-  rows.push(`Business Goals,${business.businessGoals || "Not specified"}`);
+  rows.push(escapeCsvCell("Business Information"));
+  rows.push(makeCsvRow("Business Name", business.name));
+  rows.push(makeCsvRow("Service Type", business.serviceType));
+  rows.push(makeCsvRow("Location", business.location));
+  rows.push(makeCsvRow("Target Market", business.targetMarket || "Not specified"));
+  rows.push(makeCsvRow("Business Goals", business.businessGoals || "Not specified"));
   rows.push("");
 
   // Pricing
   if (pricing) {
-    rows.push("Pricing Strategy");
-    rows.push(`Strategy,${pricing.pricingStrategy || "Not specified"}`);
+    rows.push(escapeCsvCell("Pricing Strategy"));
+    rows.push(makeCsvRow("Strategy", pricing.pricingStrategy || "Not specified"));
     rows.push("");
 
     if (pricing.recommendedTiers) {
-      rows.push("Pricing Tiers");
-      rows.push("Tier Name,Price,Description");
+      rows.push(escapeCsvCell("Pricing Tiers"));
+      rows.push(makeCsvRow("Tier Name", "Price", "Description"));
       (pricing.recommendedTiers as Array<{name: string; price: number; description: string}>).forEach(
         (tier) => {
-          rows.push(`"${tier.name}","$${tier.price}","${tier.description}"`);
+          rows.push(makeCsvRow(tier.name, `$${tier.price}`, tier.description));
         }
       );
       rows.push("");
     }
 
     if (pricing.marketBenchmark) {
-      rows.push("Market Benchmarks");
-      rows.push("Category,Price");
+      rows.push(escapeCsvCell("Market Benchmarks"));
+      rows.push(makeCsvRow("Category", "Price"));
       Object.entries(pricing.marketBenchmark as Record<string, number>).forEach(([name, value]) => {
-        rows.push(`"${name}","$${value}"`);
+        rows.push(makeCsvRow(name, `$${value}`));
       });
       rows.push("");
     }
@@ -490,21 +500,21 @@ export function generateBusinessCSV(pkg: BusinessPackage): string {
 
   // Leads
   if (leads) {
-    rows.push("Lead Generation Templates");
+    rows.push(escapeCsvCell("Lead Generation Templates"));
     if (leads.facebookAdCopy) {
-      rows.push(`Facebook Ad Copy,"${leads.facebookAdCopy.replace(/"/g, '""')}"`);
+      rows.push(makeCsvRow("Facebook Ad Copy", leads.facebookAdCopy));
     }
     if (leads.googleAdCopy) {
-      rows.push(`Google Ads Copy,"${leads.googleAdCopy.replace(/"/g, '""')}"`);
+      rows.push(makeCsvRow("Google Ads Copy", leads.googleAdCopy));
     }
     if (leads.linkedinAdCopy) {
-      rows.push(`LinkedIn Ad Copy,"${leads.linkedinAdCopy.replace(/"/g, '""')}"`);
+      rows.push(makeCsvRow("LinkedIn Ad Copy", leads.linkedinAdCopy));
     }
     if (leads.smsScript) {
-      rows.push(`SMS Script,"${leads.smsScript.replace(/"/g, '""')}"`);
+      rows.push(makeCsvRow("SMS Script", leads.smsScript));
     }
     if (leads.leadMagnetIdeas) {
-      rows.push(`Lead Magnet Ideas,"${leads.leadMagnetIdeas.replace(/"/g, '""')}"`);
+      rows.push(makeCsvRow("Lead Magnet Ideas", leads.leadMagnetIdeas));
     }
   }
 
